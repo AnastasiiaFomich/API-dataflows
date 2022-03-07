@@ -30,16 +30,19 @@ client_id = ''
 client_secret = ''
 
 #date range:
-fom = 10
-to = 0
+fom = 10 #10 days ago
+to = 0 #yesterday
 
+#declare Python function for DAG Task 1 (get account_IDs list):
 def get_mt_clients(**context):
     global token
     global requests
-    # получаем выгрузку всех клиентов, цикл нужен чтобы избежать ограничения в 50 объектов
+
     cont = True
     offset=0
     df_clients = pd.DataFrame()
+    
+    # get client IDs using paging (max objects at one request = 50):
     while cont:
         clients = requests.get('https://target.my.com/api/v2/agency/clients.json?limit=50&offset={}'.format(offset), headers={'Authorization': 'Bearer {}'.format(token)})
         offset = offset + 50
@@ -49,6 +52,7 @@ def get_mt_clients(**context):
         df_clients = pd.concat([df_clients, json_normalize(clients.json(), 'items')])
     df_clients = df_clients.reset_index(drop=True)
     
+    #refresh clients' tokens:
     for client in df_clients['user.username'].values:
         url = 'https://target.my.com/api/v2/oauth2/token/delete.json'
         myobj={
@@ -76,23 +80,13 @@ def get_mt_clients(**context):
     context['ti'].xcom_push(key = 'df_clients_mt', value = df_clients)
     return tokens
 
+#declare Python function for DAG Task 2 (get full data statystics):
 def get_mt_banners(**context): 
-    # получаем список всех баннеров
+    #get banners list:
     tokens = context['ti'].xcom_pull(key = 'mt_tokens')
     df_clients = context['ti'].xcom_pull(key = 'df_clients_mt')
     global pd
     global requests
-#    df_banners = pd.DataFrame()
- #   for token in tokens:    
-  #      cont = True
-   #     offset=0
-
-    #    while cont:
-     #       banners = requests.get('https://target.my.com/api/v2/banners.json?limit=50&offset={}'.format(offset), headers={'Authorization': 'Bearer {}'.format(token)})
-      #      offset = offset + 50
-       #     try:
-        #        if len(banners.json().get('items')) == 0:
-            #    continue
 
     def func2(tokens):
         df_banners = pd.DataFrame()
