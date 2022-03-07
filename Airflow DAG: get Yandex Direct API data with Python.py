@@ -192,16 +192,18 @@ def get_df( **context):
     context['ti'].xcom_push(key = 'clients_df', value = all_) 
     all_= all_.drop_duplicates()
     return all_
-    
-engine ='postgresql+psycopg2://airflow@localhost:8123/digitaladsdb'
+
+
+engine =''
+
+# declare Python function for DAG Task 3 (upload data to local PostgreSQL Database):
 def upload_data_to_db(**context):
-#    postgres_hook = PostgresHook(self.postgres_conn_id)
     global engine
-#engine = postgres_hook.get_sqlalchemy_engine()
     table = context['ti'].xcom_pull(key = 'clients_df') 
-   # engine = create_engine('postgresql://airflow:y59RaFJKqy@192.168.127.16:8123/digitalads')
     table.to_sql('yandex_pre2', engine, if_exists='append', index = False)
 
+
+#define subsequence of DAG Tasks:
 with DAG(**dag_params) as dag:
 
     create_table = PythonOperator(
@@ -210,39 +212,22 @@ with DAG(**dag_params) as dag:
         python_callable=get_clients_df,
         dag=dag,
     )
-#    print(type(create_table))    
-#with DAG(**dag_params) as dag:
+
     create_table2 = PythonOperator(
         task_id='download_data2',
         python_callable=get_df,
         dag=dag,
         provide_context = True,
     )
-#    insert_row = PostgresOperator(
- #   task_id='insert_row',
-  #  sql="INSERT INTO yandex1 VALUES (timestamp '2011-05-16 15:36:38', 1, 'f', 1,1,'f', 1, 1, 1, 1, 1, 'f', 'f','f','f','f')" ,
-#    parameters = ( timestamp '2011-05-16 15:36:38', 1, 'f', 1,1,'f', 1, 1, 1, 1, 1, 'f', 'f','f','f','f' ) 
-#    trigger_rule=TriggerRule.ALL_DONE,
-   # )
     drop_table = PostgresOperator(
         sql='delete from  yandex_pre2;''',
-        task_id='drop_table'
-    #    provide_context = True,
-   #     python_callable=upload_data_to_db,
-        )
+        task_id='drop_table')
     insert_table = PythonOperator(
         task_id='append_table',
         provide_context = True,
         python_callable=upload_data_to_db,
         dag=dag,
     )
-#    join_table = PostgresOperator(
- #       task_id='join_table',
-  #      sql='''insert into all_channels_ga select yandex_pre2.* from yandex_pre2 left join all_channels_ga on all_channels_ga."Ad_id" = yandex_pre2."Ad_id" and all_channels_ga."Date" = yandex_pre2."Date"  and
-# all_channels_ga."Campaign_id" = yandex_pre2."Campaign_id" and 
-#all_channels_ga."AdGroup_Id" = yandex_pre2."AdGroup_Id" and all_channels_ga."Client_id" = yandex_pre2."Client_id"
-#where all_channels_ga."Ad_id" is null and all_channels_ga."Date" is null;''',
-#         dag=dag, )
     join_table = PostgresOperator(
         task_id='join_table',
         sql='''insert into all_channels_ga select yandex_pre2.* from yandex_pre2 left join all_channels_ga on all_channels_ga."Ad_id" = yandex_pre2."Ad_id" and all_channels_ga."Date" = yandex_pre2."Date"  
@@ -259,13 +244,11 @@ all_channels_ga."AdGroup_Id" = yandex_pre2."AdGroup_Id"  ;''',
         dag=dag,    )
     delete_xcom_task = PostgresOperator(
         task_id='delete-xcom-task',
-#      postgres_conn_id='airflow_db',
         sql='''delete from xcom where dag_id=dag_id and
            task_id='download_data' ''',
         dag=dag)
     delete_xcom_task2 = PostgresOperator(
         task_id='delete-xcom-task2',
-#      postgres_conn_id='airflow_db',
         sql='''delete from xcom where dag_id=dag_id and
            task_id='download_data2' ''',
         dag=dag)
