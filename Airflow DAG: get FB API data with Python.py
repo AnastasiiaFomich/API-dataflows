@@ -221,21 +221,6 @@ def get_fb_df(**context):
 
     return report
 
-#
-def push_extra_date(**context):
-    date_extra = context['ti'].xcom_pull(key = 'fb_daterng_num2', include_prior_dates=True)
-    print('push_extra_date________',date_extra)
-    context['ti'].xcom_push(key = 'fb_daterng_num_extra2', value = date_extra)
-
-def push_new_date(**context):
-    date_extra = context['ti'].xcom_pull(key = 'fb_daterng_num_extra2')
-    date_new = date_extra-1
-#    date_new = str(date_new)
- #   date_new = int(date_new)
-    print('push_new_date________',date_new)
-    context['ti'].xcom_push(key = 'fb_daterng_num2', value = date_new)
-
-
 
 engine =''
 
