@@ -26,7 +26,7 @@ app_secret = ''
 token = ''
 business_id=''
 
-#extend access token validity%
+#extend access token validity:
 long_token_request=requests.get("https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id={}&client_secret={}&fb_exchange_token={}&access_token={}".format(app_id,app_secret,token,token))
 lt=long_token_request.text
 test_token= json.loads(lt)
@@ -49,7 +49,7 @@ def get_fb_clients_df(**context):
     print('AAI',ad_account_id)
     ad_account_id = ad_account_id.tolist()
     try:
-        ad_account_id.remove('act_10200337600668425')
+        ad_account_id.remove('')
     except:
         pass
     print('AAI',ad_account_id)
