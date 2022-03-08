@@ -5,7 +5,7 @@ Solution for generating automated data flows: run scheduled procedures via Airfl
 Each script performs the following procedures:
 1) get data via API 
 2) ETL processing
-3) Download Data to Postgres Database
+3) вownload Data to Postgres Database
 
 The Data is accumulated in Database, then used in BI tools (Tableau, Power BI) to build Business intelligence dashboards.
 
