@@ -1,5 +1,3 @@
-#from sqlalchemy import create_engine from datetime import datetime from airflow import DAG from airflow.providers.postgres.operators.postgres import PostgresOperator from airflow.providers.postgres.hooks.postgres import PostgresHook import 
-#requests, json from requests.exceptions import ConnectionError from time import sleep import pandas as pd from airflow.operators.python_operator import PythonOperator
 
 from sqlalchemy import create_engine
 from airflow import DAG
